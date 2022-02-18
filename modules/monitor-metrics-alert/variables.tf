@@ -10,6 +10,10 @@ variable "scopes_id_list" {
 
 }
 
+variable "metric_namespace" {
+
+}
+
 
 variable "action_list" {
 

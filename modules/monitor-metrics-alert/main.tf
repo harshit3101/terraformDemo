@@ -3,7 +3,7 @@
 
 resource "azurerm_monitor_metric_alert" "r_monitor_metrics_alert" {
 
-  for_each = { for item in var.monitor_metrics_alert_list : item.id => item }
+  for_each = { for index, item in var.monitor_metrics_alert_list : index => item }
 
   name                = each.value.name
   resource_group_name = var.rg_name
@@ -11,26 +11,26 @@ resource "azurerm_monitor_metric_alert" "r_monitor_metrics_alert" {
 
   description   = lookup(each.value, "description", null)
   severity      = lookup(each.value, "severity", null)
-  auto_mitigate = lookup(each.value, "autoMitigate", null)
-  frequency     = lookup(each.value, "evaluationFrequency", null)
-  window_size   = lookup(each.value, "windowSize", null)
+  auto_mitigate = lookup(each.value, "auto_mitigate", null)
+  frequency     = lookup(each.value, "frequency", null)
+  window_size   = lookup(each.value, "window_size", null)
 
   dynamic "criteria" {
     for_each = length(keys(lookup(each.value, "criteria", {}))) > 0 ? { 1 : 1 } : {}
 
     content {
-      metric_namespace = each.value.criteria.metric_namespace
+      metric_namespace = var.metric_namespace
       metric_name      = each.value.criteria.metric_name
       aggregation      = each.value.criteria.aggregation
       operator         = each.value.criteria.operator
       threshold        = each.value.criteria.threshold
       dynamic "dimension" {
-        for_each = length(keys(lookup(each.value.criteria, "dimension", {}))) > 0 ? { 1 : 1 } : {}
+        for_each = { for index, item in lookup(each.value.criteria, "dimensions", []): index => item }
 
         content {
-          name     = each.value.criteria.dimension.name
-          operator = each.value.criteria.dimension.operator
-          values   = each.value.criteria.dimension.values
+          name     = dimension.value.name
+          operator = dimension.value.operator
+          values   = dimension.value.values
         }
       }
     }
@@ -47,12 +47,12 @@ resource "azurerm_monitor_metric_alert" "r_monitor_metrics_alert" {
       operator          = each.value.dynamic_criteria.operator
       alert_sensitivity = each.value.dynamic_criteria.alert_sensitivity
       dynamic "dimension" {
-        for_each = length(keys(lookup(each.value.dynamic_criteria, "dimension", {}))) > 0 ? { 1 : 1 } : {}
+        for_each = { for index, item in lookup(each.value.dynamic_criteria, "dimensions", []): index => item }
 
         content {
-          name     = each.value.dynamic_criteria.dimension.name
-          operator = each.value.dynamic_criteria.dimension.operator
-          values   = each.value.dynamic_criteria.dimension.values
+          name     = dimension.value.name
+          operator = dimension.value.operator
+          values   = dimension.value.values
         }
       }
     }

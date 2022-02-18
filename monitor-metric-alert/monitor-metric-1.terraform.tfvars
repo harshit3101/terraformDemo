@@ -452,4 +452,3 @@ metric_list = [
 
 ]
 
-metric_name_space = "Microsoft.OperationalInsights/workspaces"
